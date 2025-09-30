@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +9,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.15.0/dist/soundfont-player.js"></script>
+
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    .piano-key.pressed { transform: translateY(2px); filter: brightness(0.9); }
-    .piano-key.w-key.correct { background-color: #28a745; border-color: #28a745; }
-    .piano-key.b-key.correct { background-color: #28a745; border-color: #1f7a34; }
-    .piano-key.w-key.incorrect { background-color: #dc3545; border-color: #dc3545; }
-    .piano-key.b-key.incorrect { background-color: #dc3545; border-color: #a71d2a; }
-    .piano-key.w-key.target { background-color: #0ea5e9; border-color: #0ea5e9; }
-    .piano-key.b-key.target { background-color: #0ea5e9; border-color: #0b8ac8; }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .piano-key.pressed {
+      transform: translateY(2px);
+      filter: brightness(0.9);
+    }
+
+    .piano-key.w-key.correct {
+      background-color: #28a745;
+      border-color: #28a745;
+    }
+
+    .piano-key.b-key.correct {
+      background-color: #28a745;
+      border-color: #1f7a34;
+    }
+
+    .piano-key.w-key.incorrect {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .piano-key.b-key.incorrect {
+      background-color: #dc3545;
+      border-color: #a71d2a;
+    }
+
+    .piano-key.w-key.target {
+      background-color: #0ea5e9;
+      border-color: #0ea5e9;
+    }
+
+    .piano-key.b-key.target {
+      background-color: #0ea5e9;
+      border-color: #0b8ac8;
+    }
   </style>
 </head>
+
 <body class="bg-gray-900 text-gray-200 flex items-center justify-center h-screen antialiased overflow-hidden">
-       <!--
+  <!--
    ________________________________________
   /                                        \
  |   It's open source - just check out     |
@@ -37,18 +71,29 @@
   <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-3xl mx-4 border border-gray-700 flex flex-col">
     <div class="flex-shrink-0">
       <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400 mb-2 text-center">Pitch Learn</h1>
-      <p id="status" class="text-sm text-gray-500 min-h-[20px] mb-6 text-center">Please connect your MIDI controller (or use the on-screen keyboard).</p>
+      <p id="status" class="text-sm text-gray-500 min-h-[20px] mb-6 text-center">Please connect your MIDI controller (or
+        use the on-screen keyboard).</p>
 
       <div id="mode-switcher" class="flex justify-center space-x-2 mb-6 flex-wrap">
-        <button id="mode-identify-major" class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">White Keys</button>
-        <button id="mode-black-keys" class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Black Keys</button>
-        <button id="mode-identify-chromatic" class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">All Keys</button>
-        <button id="mode-ear-training" class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Ear Training</button>
+        <button id="mode-identify-major"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">White
+          Keys</button>
+        <button id="mode-black-keys"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Black
+          Keys</button>
+        <button id="mode-identify-chromatic"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">All
+          Keys</button>
+        <button id="mode-ear-training"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Ear
+          Training</button>
       </div>
 
       <div class="flex items-center justify-between space-x-4">
         <div class="flex flex-col items-center justify-center w-2/5">
-          <div id="note-display" class="text-5xl sm:text-6xl font-bold text-white bg-gray-900/50 rounded-lg p-4 flex items-center justify-center h-28 w-full transition-colors">--</div>
+          <div id="note-display"
+            class="text-5xl sm:text-6xl font-bold text-white bg-gray-900/50 rounded-lg p-4 flex items-center justify-center h-28 w-full transition-colors">
+            --</div>
           <button id="replay-note" class="mt-2 text-cyan-400 hover:text-cyan-300" title="Replay note">🔊</button>
         </div>
 
@@ -56,12 +101,16 @@
 
         <div class="w-2/5 space-y-4">
           <div>
-            <label for="range-below-slider" class="block text-sm font-medium text-gray-400 mb-1">Keys Below Middle C: <span id="range-below-value">12</span></label>
-            <input id="range-below-slider" type="range" min="0" max="36" value="12" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+            <label for="range-below-slider" class="block text-sm font-medium text-gray-400 mb-1">Keys Below Middle C:
+              <span id="range-below-value">12</span></label>
+            <input id="range-below-slider" type="range" min="0" max="36" value="12"
+              class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
           </div>
           <div>
-            <label for="range-above-slider" class="block text-sm font-medium text-gray-400 mb-1">Keys Above Middle C: <span id="range-above-value">12</span></label>
-            <input id="range-above-slider" type="range" min="0" max="36" value="12" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+            <label for="range-above-slider" class="block text-sm font-medium text-gray-400 mb-1">Keys Above Middle C:
+              <span id="range-above-value">12</span></label>
+            <input id="range-above-slider" type="range" min="0" max="36" value="12"
+              class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
           </div>
           <div class="flex justify-center items-center space-x-2">
             <label for="easy-mode-toggle" class="text-sm font-medium text-gray-400">Easy Mode</label>
@@ -73,8 +122,8 @@
 
     <!-- Visual Piano Keyboard -->
     <div id="piano-container" class="relative flex justify-center mt-8 h-40 flex-shrink-0"></div>
-  
-  
+
+
   </div>
 
   <script>
@@ -92,22 +141,48 @@
     const replayButton = document.getElementById('replay-note');
 
     let audioContext;
-    function playNote(midiNote, duration = 0.5) {
+    function playNote(midiNote, duration = 1.5) {
       if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
       const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      gainNode.connect(audioContext.destination);
-      oscillator.connect(gainNode);
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
       const now = audioContext.currentTime;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.3, now + 0.02);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-      oscillator.start(now);
-      oscillator.stop(now + duration);
+
+      // Master gain with soft envelope
+      const gain = audioContext.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.6, now + 0.02); // slightly slower attack
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      gain.connect(audioContext.destination);
+
+      // Add lowpass filter to smooth out the harshness
+      const filter = audioContext.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(4000, now); // Start bright
+      filter.frequency.exponentialRampToValueAtTime(600, now + duration); // End mellow
+      filter.connect(gain);
+
+      // Fundamental and a few warm harmonics
+      const harmonics = [
+        { multiplier: 1, type: "triangle", gain: 1.0 },
+        { multiplier: 2, type: "sine", gain: 0.4 },
+        { multiplier: 3, type: "sine", gain: 0.2 }
+      ];
+
+      harmonics.forEach(({ multiplier, type, gain: harmonicGain }) => {
+        const osc = audioContext.createOscillator();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency * multiplier, now);
+
+        const partialGain = audioContext.createGain();
+        partialGain.gain.setValueAtTime(harmonicGain, now);
+
+        osc.connect(partialGain).connect(filter);
+        osc.start(now);
+        osc.stop(now + duration);
+      });
     }
+
+
 
     const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let chromaticNotes = [];
@@ -203,7 +278,7 @@
         noteDisplay.textContent = currentNote.name;
       }
 
-      setTimeout(() => playNote(currentNote.midi, 0.8), 300);
+      setTimeout(() => playNote(currentNote.midi, 1.8), 300);
 
       if (easyModeToggle.checked && currentMode !== 'ear-training') {
         const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
@@ -211,45 +286,45 @@
       }
     }
 
-let awaitingNextNote = false;
+    let awaitingNextNote = false;
 
-function handleNoteInput(note) {
-  const keyElement = document.querySelector(`.piano-key[data-midi="${note}"]`);
-  playNote(note);
+    function handleNoteInput(note) {
+      const keyElement = document.querySelector(`.piano-key[data-midi="${note}"]`);
+      playNote(note);
 
-  if (keyElement) {
-    keyElement.classList.add('pressed');
-    setTimeout(() => keyElement.classList.remove('pressed'), 150);
-  }
+      if (keyElement) {
+        keyElement.classList.add('pressed');
+        setTimeout(() => keyElement.classList.remove('pressed'), 150);
+      }
 
-  if (!currentNote) return;
+      if (!currentNote) return;
 
-  clearKeyHighlights();
+      clearKeyHighlights();
 
-  if (note === currentNote.midi) {
-    feedbackDisplay.textContent = '✅';
-    if (keyElement) keyElement.classList.add('correct');
-    if (currentMode === 'ear-training') {
-      noteDisplay.textContent = currentNote.name;
-      noteDisplay.classList.add('text-cyan-400');
+      if (note === currentNote.midi) {
+        feedbackDisplay.textContent = '✅';
+        if (keyElement) keyElement.classList.add('correct');
+        if (currentMode === 'ear-training') {
+          noteDisplay.textContent = currentNote.name;
+          noteDisplay.classList.add('text-cyan-400');
+        }
+
+        if (!awaitingNextNote) {
+          awaitingNextNote = true;
+          setTimeout(() => {
+            selectRandomNote();
+            awaitingNextNote = false;
+          }, 1200);
+        }
+      } else {
+        feedbackDisplay.textContent = '❌';
+        if (keyElement) keyElement.classList.add('incorrect');
+        if (easyModeToggle.checked) {
+          const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
+          if (targetKey) targetKey.classList.add('target');
+        }
+      }
     }
-
-    if (!awaitingNextNote) { 
-      awaitingNextNote = true;
-      setTimeout(() => {
-        selectRandomNote();
-        awaitingNextNote = false;
-      }, 1200);
-    }
-  } else {
-    feedbackDisplay.textContent = '❌';
-    if (keyElement) keyElement.classList.add('incorrect');
-    if (easyModeToggle.checked) {
-      const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
-      if (targetKey) targetKey.classList.add('target');
-    }
-  }
-}
 
 
     function handleMidiMessage(event) {
@@ -313,13 +388,15 @@ function handleNoteInput(note) {
     }
   </script>
 
-    <!-- Sticky footer -->
+  <!-- Sticky footer -->
   <footer class="fixed bottom-0 left-0 w-full text-center text-sm text-gray-500 bg-gray-950/80 backdrop-blur-sm py-3">
     Source code
-    <a href="https://github.com/Timmoth/pitchlearn" target="_blank" class="text-emerald-400 hover:underline">found on GitHub</a> ·
+    <a href="https://github.com/Timmoth/pitchlearn" target="_blank" class="text-emerald-400 hover:underline">found on
+      GitHub</a> ·
     Built by
     <a href="https://www.timmoth.com/" target="_blank" class="text-emerald-400 hover:underline">Tim Jones</a>
   </footer>
 
 </body>
+
 </html>
