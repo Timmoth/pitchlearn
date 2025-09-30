@@ -71,9 +71,9 @@
   <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-3xl mx-4 border border-gray-700 flex flex-col">
     <div class="flex-shrink-0">
       <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400 mb-2 text-center">Pitch Learn</h1>
-      <p id="status" class="text-sm text-gray-500 min-h-[20px] mb-6 text-center">Please connect your MIDI controller (or
+      <p id="status" class="text-sm text-gray-500 min-h-[20px] text-center">Please connect your MIDI controller (or
         use the on-screen keyboard).</p>
-
+      <p id="status2" class="text-sm text-gray-500 mb-4 text-center"></p>
       <div id="mode-switcher" class="flex justify-center space-x-2 mb-6 flex-wrap">
         <button id="mode-identify-major"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">White
@@ -130,6 +130,7 @@
     const noteDisplay = document.getElementById('note-display');
     const feedbackDisplay = document.getElementById('feedback-display');
     const statusDisplay = document.getElementById('status');
+    const status2Display =  document.getElementById('status2');
     const modeSwitcher = document.getElementById('mode-switcher');
     const modeButtons = document.querySelectorAll('.mode-button');
     const pianoContainer = document.getElementById('piano-container');
@@ -385,6 +386,7 @@
     } else {
       onMIDIFailure();
       statusDisplay.textContent = 'Web MIDI API not supported in this browser.';
+      status2Display.textContent = 'Use your mouse to select keys or switch to Chrome';
     }
   </script>
 
