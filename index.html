@@ -3,14 +3,29 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Interactive MIDI Piano Tutor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
-  <style>
+<style>
+  html,
+  body {
+    overflow: hidden;
+    height: 100%;
+    touch-action: manipulation;
+  }
+
+  input,
+  button,
+  label,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
     body {
       font-family: 'Inter', sans-serif;
     }
@@ -129,7 +144,7 @@
     const noteDisplay = document.getElementById('note-display');
     const feedbackDisplay = document.getElementById('feedback-display');
     const statusDisplay = document.getElementById('status');
-    const status2Display =  document.getElementById('status2');
+    const status2Display = document.getElementById('status2');
     const modeSwitcher = document.getElementById('mode-switcher');
     const modeButtons = document.querySelectorAll('.mode-button');
     const pianoContainer = document.getElementById('piano-container');
