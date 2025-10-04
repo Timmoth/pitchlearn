@@ -9,22 +9,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<script src="./soundfont-player.js"></script>
 
-<style>
-  html,
-  body {
-    overflow: hidden;
-    height: 100%;
-    touch-action: manipulation;
-  }
+<script src="./main.js" defer></script>
+  <style>
+    html,
+    body {
+      overflow: hidden;
+      height: 100%;
+      touch-action: manipulation;
+    }
 
-  input,
-  button,
-  label,
-  select,
-  textarea {
-    font-size: 16px !important;
-  }
+    input,
+    button,
+    label,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -88,7 +90,7 @@
       <p id="status" class="text-sm text-gray-500 min-h-[20px] text-center">Please connect your MIDI controller (or
         use the on-screen keyboard).</p>
       <p id="status2" class="text-sm text-gray-500 mb-4 text-center"></p>
-      <div id="mode-switcher" class="flex justify-center space-x-2 mb-6 flex-wrap">
+      <div id="mode-switcher" class="flex justify-center space-x-2 space-y-2 mb-6 flex-wrap">
         <button id="mode-identify-major"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">White
           Keys</button>
@@ -98,15 +100,20 @@
         <button id="mode-identify-chromatic"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">All
           Keys</button>
+                  <button id="chords-major"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Major chords
+          </button>
+                  <button id="chords-minor"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Minor Chords</button>
         <button id="mode-ear-training"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Ear
           Training</button>
       </div>
 
       <div class="flex items-center justify-between space-x-4">
-        <div class="flex flex-col items-center justify-center w-2/5">
+        <div class="flex flex-col items-center justify-center w-3/5">
           <div id="note-display"
-            class="text-5xl sm:text-6xl font-bold text-white bg-gray-900/50 rounded-lg p-4 flex items-center justify-center h-28 w-full transition-colors">
+            class="text-2xl font-bold text-white bg-gray-900/50 rounded-lg p-4 flex items-center justify-center h-28 w-full transition-colors">
             --</div>
           <button id="replay-note" class="mt-2 text-cyan-400 hover:text-cyan-300" title="Replay note">🔊</button>
         </div>
@@ -116,8 +123,8 @@
         <div class="w-2/5 space-y-4">
           <div>
             <label for="range-below-slider" class="block text-sm font-medium text-gray-400 mb-1">Keys Below Middle C:
-              <span id="range-below-value">12</span></label>
-            <input id="range-below-slider" type="range" min="0" max="36" value="12"
+              <span id="range-below-value">0</span></label>
+            <input id="range-below-slider" type="range" min="0" max="36" value="0"
               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
           </div>
           <div>
@@ -139,270 +146,6 @@
 
 
   </div>
-
-  <script>
-    const noteDisplay = document.getElementById('note-display');
-    const feedbackDisplay = document.getElementById('feedback-display');
-    const statusDisplay = document.getElementById('status');
-    const status2Display = document.getElementById('status2');
-    const modeSwitcher = document.getElementById('mode-switcher');
-    const modeButtons = document.querySelectorAll('.mode-button');
-    const pianoContainer = document.getElementById('piano-container');
-    const rangeBelowSlider = document.getElementById('range-below-slider');
-    const rangeAboveSlider = document.getElementById('range-above-slider');
-    const rangeBelowValue = document.getElementById('range-below-value');
-    const rangeAboveValue = document.getElementById('range-above-value');
-    const easyModeToggle = document.getElementById('easy-mode-toggle');
-    const replayButton = document.getElementById('replay-note');
-
-    let audioContext;
-    function playNote(midiNote, duration = 1.5) {
-      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-      const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
-      const now = audioContext.currentTime;
-
-      // Master gain with soft envelope
-      const gain = audioContext.createGain();
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.6, now + 0.02); // slightly slower attack
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-      gain.connect(audioContext.destination);
-
-      // Add lowpass filter to smooth out the harshness
-      const filter = audioContext.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(4000, now); // Start bright
-      filter.frequency.exponentialRampToValueAtTime(600, now + duration); // End mellow
-      filter.connect(gain);
-
-      // Fundamental and a few warm harmonics
-      const harmonics = [
-        { multiplier: 1, type: "triangle", gain: 1.0 },
-        { multiplier: 2, type: "sine", gain: 0.4 },
-        { multiplier: 3, type: "sine", gain: 0.2 }
-      ];
-
-      harmonics.forEach(({ multiplier, type, gain: harmonicGain }) => {
-        const osc = audioContext.createOscillator();
-        osc.type = type;
-        osc.frequency.setValueAtTime(frequency * multiplier, now);
-
-        const partialGain = audioContext.createGain();
-        partialGain.gain.setValueAtTime(harmonicGain, now);
-
-        osc.connect(partialGain).connect(filter);
-        osc.start(now);
-        osc.stop(now + duration);
-      });
-    }
-
-
-
-    const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    let chromaticNotes = [];
-    let majorScaleNotes = [];
-    let blackKeyNotes = [];
-    let currentMode = 'identify-major';
-    let currentNote = null;
-
-    function updateNotePoolsAndPiano() {
-      const middleC = 60;
-      const rangeBelow = parseInt(rangeBelowSlider.value);
-      const rangeAbove = parseInt(rangeAboveSlider.value);
-      const startNote = middleC - rangeBelow;
-      const endNote = middleC + rangeAbove;
-
-      rangeBelowValue.textContent = rangeBelow;
-      rangeAboveValue.textContent = rangeAbove;
-
-      chromaticNotes = Array.from({ length: endNote - startNote + 1 }, (_, i) => {
-        const midi = startNote + i;
-        const octave = Math.floor(midi / 12) - 1;
-        const name = NOTE_NAMES[midi % 12];
-        return { name: `${name}${octave}`, midi };
-      });
-
-      majorScaleNotes = chromaticNotes.filter(n => !n.name.includes('#'));
-      blackKeyNotes = chromaticNotes.filter(n => n.name.includes('#'));
-
-      generatePianoKeys();
-      selectRandomNote();
-    }
-
-    function generatePianoKeys() {
-      pianoContainer.innerHTML = '';
-      const whiteKeys = chromaticNotes.filter(n => !n.name.includes('#'));
-      const keyWidth = 100 / whiteKeys.length;
-
-      chromaticNotes.forEach(note => {
-        const key = document.createElement('div');
-        key.dataset.midi = note.midi;
-        key.classList.add('piano-key', 'transition-all', 'duration-100');
-
-        if (note.name.includes('#')) {
-          key.classList.add('b-key', 'absolute', 'h-2/3', 'bg-gray-900', 'border-2', 'border-gray-700', 'rounded-b-md', 'z-10');
-          key.style.width = `${keyWidth * 0.6}%`;
-          const whiteKeyIndex = whiteKeys.findIndex(n => n.midi > note.midi) - 1;
-          key.style.left = `${(whiteKeyIndex + 1) * keyWidth - (keyWidth * 0.3)}%`;
-        } else {
-          key.classList.add('w-key', 'h-full', 'bg-gray-200', 'border-2', 'border-gray-400', 'rounded-md');
-          key.style.width = `${keyWidth}%`;
-        }
-
-        // Add mouse click support
-        key.addEventListener('mousedown', () => {
-          handleNoteInput(note.midi);
-        });
-
-        pianoContainer.appendChild(key);
-      });
-    }
-
-    function clearKeyHighlights() {
-      document.querySelectorAll('.piano-key').forEach(k => {
-        k.classList.remove('correct', 'incorrect', 'target');
-      });
-    }
-
-    function selectRandomNote() {
-      clearKeyHighlights();
-      let notePool;
-      switch (currentMode) {
-        case 'identify-major': notePool = majorScaleNotes; break;
-        case 'identify-chromatic': notePool = chromaticNotes; break;
-        case 'black-keys': notePool = blackKeyNotes; break;
-        case 'ear-training': notePool = chromaticNotes; break;
-        default: notePool = majorScaleNotes;
-      }
-
-      if (notePool.length === 0) return;
-
-      let newNote;
-      do {
-        newNote = notePool[Math.floor(Math.random() * notePool.length)];
-      } while (newNote === currentNote && notePool.length > 1);
-
-      currentNote = newNote;
-      feedbackDisplay.textContent = '';
-      noteDisplay.classList.remove('text-cyan-400');
-
-      if (currentMode === 'ear-training') {
-        noteDisplay.textContent = '?';
-      } else {
-        noteDisplay.textContent = currentNote.name;
-      }
-
-      setTimeout(() => playNote(currentNote.midi, 1.8), 300);
-
-      if (easyModeToggle.checked && currentMode !== 'ear-training') {
-        const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
-        if (targetKey) targetKey.classList.add('target');
-      }
-    }
-
-    let awaitingNextNote = false;
-
-    function handleNoteInput(note) {
-      const keyElement = document.querySelector(`.piano-key[data-midi="${note}"]`);
-      playNote(note);
-
-      if (keyElement) {
-        keyElement.classList.add('pressed');
-        setTimeout(() => keyElement.classList.remove('pressed'), 150);
-      }
-
-      if (!currentNote) return;
-
-      clearKeyHighlights();
-
-      if (note === currentNote.midi) {
-        feedbackDisplay.textContent = '✅';
-        if (keyElement) keyElement.classList.add('correct');
-        if (currentMode === 'ear-training') {
-          noteDisplay.textContent = currentNote.name;
-          noteDisplay.classList.add('text-cyan-400');
-        }
-
-        if (!awaitingNextNote) {
-          awaitingNextNote = true;
-          setTimeout(() => {
-            selectRandomNote();
-            awaitingNextNote = false;
-          }, 1200);
-        }
-      } else {
-        feedbackDisplay.textContent = '❌';
-        if (keyElement) keyElement.classList.add('incorrect');
-        if (easyModeToggle.checked) {
-          const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
-          if (targetKey) targetKey.classList.add('target');
-        }
-      }
-    }
-
-
-    function handleMidiMessage(event) {
-      const [command, note, velocity] = event.data;
-      if (command === 144 && velocity > 0) {
-        handleNoteInput(note);
-      }
-    }
-
-    function setupModeSwitcher() {
-      modeSwitcher.addEventListener('click', (e) => {
-        if (!e.target.matches('.mode-button')) return;
-        currentMode = e.target.id.replace('mode-', '');
-        updateButtonStyles();
-        selectRandomNote();
-      });
-      updateButtonStyles();
-    }
-
-    function updateButtonStyles() {
-      modeButtons.forEach(button => {
-        const isActive = button.id === `mode-${currentMode}`;
-        button.classList.toggle('bg-cyan-500', isActive);
-        button.classList.toggle('text-white', isActive);
-        button.classList.toggle('bg-gray-700', !isActive);
-        button.classList.toggle('hover:bg-gray-600', !isActive);
-        button.classList.toggle('text-gray-300', !isActive);
-      });
-    }
-
-    function onMIDISuccess(midiAccess) {
-      statusDisplay.textContent = 'MIDI connected! Ready to play.';
-      midiAccess.inputs.forEach(input => input.onmidimessage = handleMidiMessage);
-      setupModeSwitcher();
-      rangeBelowSlider.addEventListener('input', updateNotePoolsAndPiano);
-      rangeAboveSlider.addEventListener('input', updateNotePoolsAndPiano);
-      easyModeToggle.addEventListener('change', selectRandomNote);
-      replayButton.addEventListener('click', () => {
-        if (currentNote) playNote(currentNote.midi, 0.8);
-      });
-      updateNotePoolsAndPiano();
-    }
-
-    function onMIDIFailure() {
-      statusDisplay.textContent = 'Could not access your MIDI devices.';
-      setupModeSwitcher();
-      rangeBelowSlider.addEventListener('input', updateNotePoolsAndPiano);
-      rangeAboveSlider.addEventListener('input', updateNotePoolsAndPiano);
-      easyModeToggle.addEventListener('change', selectRandomNote);
-      replayButton.addEventListener('click', () => {
-        if (currentNote) playNote(currentNote.midi, 0.8);
-      });
-      updateNotePoolsAndPiano();
-    }
-
-    if (navigator.requestMIDIAccess) {
-      navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-    } else {
-      onMIDIFailure();
-      statusDisplay.textContent = 'Web MIDI API not supported in this browser.';
-      status2Display.textContent = 'Use your mouse to select keys or switch to Chrome';
-    }
-  </script>
 
   <!-- Sticky footer -->
   <footer class="fixed bottom-0 left-0 w-full text-center text-sm text-gray-500 bg-gray-950/80 backdrop-blur-sm py-3">
