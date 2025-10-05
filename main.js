@@ -120,6 +120,32 @@ function generatePianoKeys() {
     });
 }
 
+function midiToVexKey(midi) {
+  const noteNames = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+  const octave = Math.floor(midi / 12) - 1;  // MIDI octave numbering
+  const noteName = noteNames[midi % 12];
+  return `${noteName}/${octave}`;
+}
+
+function renderNotesOnStave(notes) {
+  const musicDiv = document.getElementById('music');
+  musicDiv.innerHTML = "";
+
+  const renderer = new Vex.Flow.Renderer(musicDiv, Vex.Flow.Renderer.Backends.SVG);
+  renderer.resize(500, 150);
+  const context = renderer.getContext();
+
+  const staveWidth = 200;
+  const staveX = (500 - staveWidth) / 2;
+  const stave = new Vex.Flow.Stave(staveX, 20, staveWidth);
+  stave.addClef("treble").setContext(context).draw();
+
+  const keys = notes.map(n => n.vexKey);
+  const vfNotes = [ new Vex.Flow.StaveNote({ keys, duration: "q" }) ];
+
+  Vex.Flow.Formatter.FormatAndDraw(context, stave, vfNotes);
+}
+
 // ===============================
 // Game Logic
 // ===============================
@@ -132,8 +158,8 @@ function selectRandomNote() {
         case 'identify-chromatic': notePool = chromaticNotes; break;
         case 'black-keys': notePool = blackKeyNotes; break;
         case 'ear-training': notePool = chromaticNotes; break;
-        case 'chords-major': 
-        case 'chords-minor': 
+        case 'chords-major':
+        case 'chords-minor':
             notePool = majorScaleNotes; break;
         default: notePool = majorScaleNotes;
     }
@@ -148,7 +174,7 @@ function selectRandomNote() {
         const minMidi = chromaticNotes[0].midi;
         const maxMidi = chromaticNotes[chromaticNotes.length - 1].midi;
 
-        const validRoots = notePool.filter(root => 
+        const validRoots = notePool.filter(root =>
             root.midi + Math.max(...intervals) <= maxMidi &&
             root.midi + Math.min(...intervals) >= minMidi
         );
@@ -173,6 +199,7 @@ function selectRandomNote() {
                 if (targetKey) targetKey.classList.add('target');
             });
         }
+    renderNotesOnStave(currentChord.map(n => ({ vexKey: midiToVexKey(n.midi) })));
 
     } else {
         let newNote;
@@ -191,6 +218,8 @@ function selectRandomNote() {
             const targetKey = document.querySelector(`.piano-key[data-midi="${currentNote.midi}"]`);
             if (targetKey) targetKey.classList.add('target');
         }
+    renderNotesOnStave([{ vexKey: midiToVexKey(currentNote.midi) }]);
+
     }
 }
 

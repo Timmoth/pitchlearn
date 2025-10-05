@@ -9,9 +9,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-<script src="./soundfont-player.js"></script>
+  <script src="./vexflow.js"></script>
 
-<script src="./main.js" defer></script>
+  <script src="./soundfont-player.js"></script>
+
+  <script src="./main.js" defer></script>
   <style>
     html,
     body {
@@ -90,9 +92,10 @@
       <p id="status" class="text-sm text-gray-500 min-h-[20px] text-center">Please connect your MIDI controller (or
         use the on-screen keyboard).</p>
       <p id="status2" class="text-sm text-gray-500 mb-4 text-center"></p>
-      <div id="mode-switcher" class="flex justify-center space-x-2 space-y-2 mb-6 flex-wrap">
+<div id="mode-switcher" 
+     class="flex flex-wrap justify-center gap-2 mb-6">
         <button id="mode-identify-major"
-          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">White
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors ">White
           Keys</button>
         <button id="mode-black-keys"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Black
@@ -100,11 +103,13 @@
         <button id="mode-identify-chromatic"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">All
           Keys</button>
-                  <button id="chords-major"
-          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Major chords
-          </button>
-                  <button id="chords-minor"
-          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Minor Chords</button>
+        <button id="chords-major"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Major
+          chords
+        </button>
+        <button id="chords-minor"
+          class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Minor
+          Chords</button>
         <button id="mode-ear-training"
           class="mode-button px-3 py-2 text-xs sm:px-4 sm:text-sm font-semibold rounded-lg transition-colors">Ear
           Training</button>
@@ -114,7 +119,7 @@
         <div class="flex flex-col items-center justify-center w-3/5">
           <div id="note-display"
             class="text-2xl font-bold text-white bg-gray-900/50 rounded-lg p-4 flex items-center justify-center h-28 w-full transition-colors">
-            --</div>
+          </div>
           <button id="replay-note" class="mt-2 text-cyan-400 hover:text-cyan-300" title="Replay note">🔊</button>
         </div>
 
@@ -141,6 +146,9 @@
       </div>
     </div>
 
+    <div id="music" class="bg-gray-50 rounded-lg m-4 flex items-center justify-center w-full transition-colors">>
+
+    </div>
     <!-- Visual Piano Keyboard -->
     <div id="piano-container" class="relative flex justify-center mt-8 h-40 flex-shrink-0"></div>
 
